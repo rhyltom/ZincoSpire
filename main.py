@@ -11,7 +11,14 @@ WIDTH = 1000
 HEIGHT = 600
 
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
+
+
 pygame.display.set_caption("Zinco Spire")
+
+
+from entities.map_node import load_icons
+load_icons()
+
 
 clock = pygame.time.Clock()
 
@@ -21,7 +28,8 @@ side_panel = pygame.Rect(700, 20, 280, 560)
 
 player_hp = 50
 
-state = MapState()
+map_state = MapState()
+state = map_state
 
 running = True
 
@@ -37,11 +45,18 @@ while running:
 
         new_state = state.handle_event(event)
 
-        if new_state == "COMBAT":
-            state = CombatState(floor, player)
+        if isinstance(new_state, tuple):
+            state_name, tier = new_state
+            if state_name == "COMBAT":
+                state = CombatState(tier, player)
 
         elif new_state == "MAP":
-            state = MapState()
+            state = map_state
+
+        elif new_state == "REST":
+            heal = int(player.max_hp * 0.3)
+            player.hp = min(player.hp + heal, player.max_hp)
+            state = map_state    
 
 
     state.update()

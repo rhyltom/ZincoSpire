@@ -16,9 +16,9 @@ def draw_hp_bar(screen, x, y, width, height, current_hp, max_hp):
 
 class CombatState:
 
-    def __init__(self, floor, player): 
+    def __init__(self, tier, player): 
 
-        monster = get_monster_by_difficulty(floor)
+        monster = get_monster_by_difficulty(tier)
 
         self.enemy_name = monster["name"]
         self.enemy_hp = monster["hp"]
