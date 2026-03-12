@@ -6,8 +6,10 @@ from states.combat_state import CombatState
 from states.game_over_state import GameOverState
 from states.reward_state import RewardState
 from states.vocation_state import VocationSelect
+from states.shop_state import ShopState
 
 from entities.player import Player
+
 
 pygame.init()
 
@@ -15,7 +17,6 @@ WIDTH = 1000
 HEIGHT = 600
 
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
-
 pygame.display.set_caption("Zinco Spire")
 
 from entities.map_node import load_icons
@@ -26,6 +27,7 @@ clock = pygame.time.Clock()
 font = pygame.font.SysFont(None, 28)
 
 side_panel = pygame.Rect(700, 20, 280, 560)
+
 
 # ========================
 # INITIAL STATES
@@ -52,13 +54,20 @@ while running:
 
         new_state = state.handle_event(event)
 
+
+        # ========================
+        # STATES THAT RETURN TUPLES
+        # ========================
+
         if isinstance(new_state, tuple):
 
             state_name = new_state[0]
 
+
             # ========================
             # START GAME (CHOOSE CLASS)
             # ========================
+
             if state_name == "START_GAME":
 
                 vocation = new_state[1]
@@ -73,6 +82,7 @@ while running:
             # ========================
             # COMBAT
             # ========================
+
             elif state_name == "COMBAT":
 
                 tier = new_state[1]
@@ -83,6 +93,7 @@ while running:
             # ========================
             # VICTORY → REWARD
             # ========================
+
             elif state_name == "VICTORY":
 
                 tier = new_state[1]
@@ -91,16 +102,18 @@ while running:
 
 
         # ========================
-        # RETURN TO MAP
+        # SIMPLE STATES
         # ========================
+
         elif new_state == "MAP":
 
             state = map_state
 
 
         # ========================
-        # REST CAMPFIRE
+        # REST (CAMPFIRE)
         # ========================
+
         elif new_state == "REST":
 
             heal = int(player.max_hp * 0.3)
@@ -111,8 +124,18 @@ while running:
 
 
         # ========================
+        # SHOP
+        # ========================
+
+        elif new_state == "SHOP":
+
+            state = ShopState(player)
+
+
+        # ========================
         # RESTART GAME
         # ========================
+
         elif new_state == "RESTART":
 
             player = None
@@ -133,22 +156,25 @@ while running:
 
     state.update()
 
+
+    # ========================
+    # DRAW
+    # ========================
+
     screen.fill((44,44,44))
 
 
-    # ========================
-    # DRAW CURRENT STATE
-    # ========================
+    # SIDE PANEL
+    pygame.draw.rect(screen, (80,80,80), side_panel)
 
+
+    # CURRENT STATE
     state.draw(screen, font)
 
 
     # ========================
-    # SIDE PANEL
+    # PLAYER UI
     # ========================
-
-    pygame.draw.rect(screen, (80,80,80), side_panel)
-
 
     if player:
 

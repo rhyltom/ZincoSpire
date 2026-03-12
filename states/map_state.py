@@ -120,6 +120,8 @@ class MapState:
                         return ("COMBAT", 4)
                     elif node.type in "rest":
                         return "REST"
+                    elif node.type == "shop":
+                        return "SHOP"
 
 
     def update(self):
