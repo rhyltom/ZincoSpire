@@ -10,7 +10,7 @@ class DamageText:
         self.text = text
         self.color = color
 
-        self.timer = 60
+        self.timer = 80
         self.velocity = -1
 
     def update(self):
@@ -21,8 +21,8 @@ class DamageText:
     def draw(self, screen, font):
 
         alpha = int(255 * (self.timer / 60))
-
-        text_surface = font.render(self.text, True, self.color)
+        big_font = pygame.font.SysFont(None, 44)
+        text_surface = big_font.render(self.text, True, self.color)
         text_surface.set_alpha(alpha)
 
         screen.blit(text_surface, (self.x, self.y))
