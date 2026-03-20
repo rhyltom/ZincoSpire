@@ -11,7 +11,7 @@ MOBS = {
     ],
 
     2:[
-        {"name": "Giant Spider", "hp": 100, "attack": 10},
+        {"name": "Giant Spider", "hp": 60, "attack": 7},
     ],
 
     3:[

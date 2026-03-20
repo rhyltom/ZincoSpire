@@ -3,11 +3,32 @@ class Player:
     def __init__(self, vocation="warrior"):
 
         self.vocation = vocation
+        self.skills = []
+
+        # ========================
+        # PASSIVES
+        self.passive = None
+
+        PASSIVES = {
+            "warrior": {
+                "name": "Thick Skin",
+                "desc": "-2 damage taken"
+            },
+            "hunter": {
+                "name": "Hunter Instinct",
+                "desc": "20% chance to evade"
+            },
+            "mage": {
+                "name": "Arcane Power",
+                "desc": "+2MP/turn, +20% MGC dmg"
+            }
+        }
+
+        self.passive = PASSIVES.get(vocation)
+
 
         # ========================
         # BASE STATS
-        # ========================
-
         self.max_hp = 50
         self.hp = 50
 
@@ -24,11 +45,12 @@ class Player:
         self.crit_chance = 0.1
         self.crit_multiplier = 2
 
+
         # ========================
         # CLASSES
-        # ========================
-
         if vocation == "warrior":
+
+            self.skills = ["power_strike"]
 
             self.max_hp = 80
             self.hp = 80
@@ -45,6 +67,8 @@ class Player:
 
         elif vocation == "hunter":
 
+            self.skills = ["poison_arrow"]
+
             self.max_hp = 60
             self.hp = 60
 
@@ -59,6 +83,8 @@ class Player:
 
 
         elif vocation == "mage":
+
+            self.skills = ["fireball"]
 
             self.max_hp = 40
             self.hp = 40
@@ -75,8 +101,6 @@ class Player:
 
         # ========================
         # INVENTORY
-        # ========================
-
         self.items = []
         self.gold = 0
         self.status = []
@@ -84,9 +108,12 @@ class Player:
 
     # ========================
     # DAMAGE SYSTEM
-    # ========================
-
     def take_damage(self, dmg):
+
+        # PASSIVE: THICK SKIN
+        if self.passive and self.passive["name"] == "Thick Skin":
+            dmg -= 2
+        dmg = max(1, dmg)
 
         blocked = min(self.block, dmg)
 
@@ -105,8 +132,6 @@ class Player:
 
     # ========================
     # HEALING
-    # ========================
-
     def heal(self, amount):
 
         self.hp += amount
@@ -117,8 +142,6 @@ class Player:
 
     # ========================
     # MANA SYSTEM
-    # ========================
-
     def use_mana(self, amount):
 
         if self.mana >= amount:

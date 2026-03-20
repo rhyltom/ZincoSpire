@@ -7,6 +7,7 @@ from states.game_over_state import GameOverState
 from states.reward_state import RewardState
 from states.vocation_state import VocationSelect
 from states.shop_state import ShopState
+from states.skill_select_state import SkillSelectState
 
 from entities.player import Player
 
@@ -28,16 +29,19 @@ font = pygame.font.SysFont(None, 28)
 
 side_panel = pygame.Rect(700, 20, 280, 560)
 
-current_act = 1
-MAX_ACT = 3
+
 
 # ========================
 # INITIAL STATES
 # ========================
 
 player = None
-map_state = MapState(current_act)
 
+current_act = 1
+MAX_ACT = 3
+
+map_state = MapState(current_act)
+next_map = None
 state = VocationSelect()
 
 running = True
@@ -75,10 +79,12 @@ while running:
                 vocation = new_state[1]
 
                 player = Player(vocation)
+                current_act = 1
 
                 map_state = MapState(current_act)
-
                 state = map_state
+
+                
 
 
             # ========================
@@ -99,16 +105,21 @@ while running:
             elif state_name == "VICTORY":
 
                 data = new_state[1]
-                    # se for boss → próximo act
-                if isinstance(data, dict) and data.get("type") == "boss":
-                    current_act += 1
-                    if current_act > MAX_ACT:
-                        print("YOU WIN THE GAME!")
-                        state = VocationSelect()  # ou victory screen
-                    else:
-                        map_state = MapState(current_act)
-                        state = map_state
 
+                    # se for boss → próximo act
+                if data.get("type") == "boss":
+                    player.gold += 50
+
+                    # boss final → acaba logo
+                    if current_act >= MAX_ACT:
+                        print("YOU WIN THE GAME!")
+                        state = GameOverState(player)
+
+                    else:
+                        # guarda próximo act
+                        current_act += 1
+                        next_map = MapState(current_act)
+                        state = SkillSelectState(player)
 
                 else:
                         state = RewardState(player, data)
@@ -119,7 +130,9 @@ while running:
         # ========================
 
         elif new_state == "MAP":
-
+            if next_map:
+                map_state = next_map
+                next_map = None
             state = map_state
 
 
@@ -152,9 +165,9 @@ while running:
         elif new_state == "RESTART":
 
             player = None
+            current_act = 1
 
             map_state = MapState(current_act)
-
             state = VocationSelect()
 
 

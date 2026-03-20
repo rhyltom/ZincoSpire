@@ -59,14 +59,20 @@ class RewardState:
                     reward = self.rewards[i]
 
                     # reward de item
-                    if self.type == "elite" or self.type == "boss":
-
+                    if self.type == "elite":
                         self.player.items.append(reward)
                         self.apply_item_effect(reward)
+                    elif self.type == "boss":
+                        self.rewards = random.sample(SKILL_POOL, 3)
+                        SKILL_POOL = [
+                            {"id": "fireball", "name": "Fireball"},
+                            {"id": "power_strike", "name": "Power Strike"},
+                            {"id": "evade", "name": "Evade"},
+                        ]
+                        self.player.skills.append(reward["id"])
 
                     # reward normal
                     else:
-
                         self.apply_reward(reward)
 
                     return "MAP"
