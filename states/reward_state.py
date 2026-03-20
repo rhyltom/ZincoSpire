@@ -7,27 +7,28 @@ from ui.button import Button
 
 class RewardState:
 
-    def __init__(self, player, tier):
+    def __init__(self, player, data):
+
 
         self.player = player
-        self.tier = tier
+
+        self.type = data.get("type")
+        t = data.get("type")
 
         # definir rewards
-        if tier == 1:
-
+        if t == "mob":
             self.rewards = [
                 {"name": "Heal 10 HP", "type": "heal"},
                 {"name": "Gain 20 Gold", "type": "gold"}
-            ]
+        ]
 
-        elif tier == 2:
-
-            # escolher 2 items aleatórios
+        elif t == "elite":
             self.rewards = random.sample(items, 2)
 
-        else:
+        elif t == "boss":
+            self.rewards = random.sample(items, 3)
 
-            self.rewards = []
+
 
         # criar botões
         self.buttons = []
@@ -58,7 +59,7 @@ class RewardState:
                     reward = self.rewards[i]
 
                     # reward de item
-                    if self.tier == 2:
+                    if self.type == "elite" or self.type == "boss":
 
                         self.player.items.append(reward)
                         self.apply_item_effect(reward)
@@ -114,7 +115,10 @@ class RewardState:
         pygame.draw.rect(screen, (200,200,200), (250,180,350,300), 2)
 
         # título
-        title_text = "Choose Item" if self.tier == 2 else "Choose Reward"
+        if self.type == "elite" or self.type == "boss":
+            title_text = "Choose Item"
+        else:
+            title_text = "Choose Reward"
 
         title = font.render(title_text, True, (255,255,255))
         screen.blit(title, (340,200))
@@ -136,7 +140,7 @@ class RewardState:
 
 
         # descrição + icon dos items (elite)
-        if self.tier == 2:
+        if self.type == "elite" or self.type == "boss":
             for i, reward in enumerate(self.rewards):
 
                 y = 260 + i * 70

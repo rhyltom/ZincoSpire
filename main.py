@@ -28,13 +28,15 @@ font = pygame.font.SysFont(None, 28)
 
 side_panel = pygame.Rect(700, 20, 280, 560)
 
+current_act = 1
+MAX_ACT = 3
 
 # ========================
 # INITIAL STATES
 # ========================
 
 player = None
-map_state = MapState()
+map_state = MapState(current_act)
 
 state = VocationSelect()
 
@@ -74,7 +76,7 @@ while running:
 
                 player = Player(vocation)
 
-                map_state = MapState()
+                map_state = MapState(current_act)
 
                 state = map_state
 
@@ -85,9 +87,9 @@ while running:
 
             elif state_name == "COMBAT":
 
-                tier = new_state[1]
+                data = new_state[1]
 
-                state = CombatState(tier, player)
+                state = CombatState(data, player)
 
 
             # ========================
@@ -96,9 +98,20 @@ while running:
 
             elif state_name == "VICTORY":
 
-                tier = new_state[1]
+                data = new_state[1]
+                    # se for boss → próximo act
+                if isinstance(data, dict) and data.get("type") == "boss":
+                    current_act += 1
+                    if current_act > MAX_ACT:
+                        print("YOU WIN THE GAME!")
+                        state = VocationSelect()  # ou victory screen
+                    else:
+                        map_state = MapState(current_act)
+                        state = map_state
 
-                state = RewardState(player, tier)
+
+                else:
+                        state = RewardState(player, data)
 
 
         # ========================
@@ -140,7 +153,7 @@ while running:
 
             player = None
 
-            map_state = MapState()
+            map_state = MapState(current_act)
 
             state = VocationSelect()
 

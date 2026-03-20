@@ -1,9 +1,11 @@
 import pygame
 import random
 
-from entities.monsters import get_monster_by_difficulty
+
 from ui.damage_text import DamageText
 from ui.button import Button
+from entities.monsters import get_monster
+
 
 from skills.skills import (
     fireball,
@@ -45,26 +47,25 @@ def draw_hp_bar(screen, x, y, width, height, current_hp, max_hp):
 
 class CombatState:
 
-    def __init__(self, tier, player):
-
-        monster = get_monster_by_difficulty(tier)
+    def __init__(self, data, player):
 
         self.player = player
-        self.tier = tier
+        self.data = data
+        self.tier = data.get("tier", 1)
 
-        # ========================
+        monster = get_monster(data)
+
+        
+
+        # ============
         # ENEMY STATS
-        # ========================
-
         self.enemy_name = monster["name"]
         self.enemy_hp = monster["hp"]
         self.enemy_max_hp = monster["hp"]
         self.enemy_attack = monster["attack"]
 
-        # ========================
+        # ============
         # COMBAT STATE
-        # ========================
-
         self.enemy_timer = 0
         self.player_turn = True
         self.combat_over = False
@@ -78,10 +79,8 @@ class CombatState:
         self.skill_cooldown = 0
         self.defense_cooldown = 0
 
-        # ========================
+        # =================
         # LOAD ENEMY SPRITE
-        # ========================
-
         name = self.enemy_name.lower().replace(" ", "_")
         path = f"assets/sprites/{name}.png"
 
@@ -92,10 +91,8 @@ class CombatState:
             self.enemy_sprite = None
 
 
-        # ========================
+        # =================
         # CLASS SKILL NAMES
-        # ========================
-
         if player.vocation == "warrior":
             skill_name = "Power Strike"
             defense_name = "Shield Block"
@@ -109,10 +106,8 @@ class CombatState:
             defense_name = "Mana Shield"
 
 
-        # ========================
+        # =============
         # BUTTON LAYOUT
-        # ========================
-
         button_width = 180
         gap = 20
 
@@ -126,9 +121,11 @@ class CombatState:
         self.return_button.rect.centerx = COMBAT_CENTER_X
 
 
+        
+
+
     # ========================
     # HANDLE INPUT
-    # ========================
 
     def handle_event(self, event):
 
@@ -196,7 +193,7 @@ class CombatState:
 
             elif self.combat_over and self.return_button.clicked(event):
 
-                return ("VICTORY", self.tier)
+                return ("VICTORY", self.data)
 
 
         if self.player.hp <= 0:

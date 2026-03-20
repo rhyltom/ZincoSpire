@@ -1,43 +1,75 @@
 import random
 
-TIER_1 = [
-    {"name": "Rat", "hp": 10, "attack": 2},
-    {"name": "Cave Rat", "hp": 12, "attack": 2},
-    {"name": "Snake", "hp": 10, "attack": 3},
-]
-
-TIER_2 = [
-    {"name": "Orc", "hp": 25, "attack": 6},
-    {"name": "Minotaur", "hp": 30, "attack": 5},
-]
-
-TIER_3 = [
-]
-
-TIER_4 = [
-    {"name": "Dwarf", "hp": 55, "attack": 11},
-]
-
-BOSSES = [
-    {"name": "Dragon", "hp": 120, "attack": 20},
-]
 
 
-def get_monster_by_difficulty(tier):
+MOBS = {
+    1:[
+    {"name": "Rat", "hp": 20, "attack": 2},
+    {"name": "Snake", "hp": 17, "attack": 3},
+    {"name": "Orc", "hp": 35, "attack": 5},
+    {"name": "Minotaur", "hp": 40, "attack": 5},
+    ],
 
-    if tier == 1:
-        pool = TIER_1
+    2:[
+        {"name": "Giant Spider", "hp": 100, "attack": 10},
+    ],
 
-    elif tier == 2:
-        pool = TIER_2
+    3:[
+        {"name": "Giant Spider", "hp": 100, "attack": 10},
+    ]
+}
 
-    elif tier == 3:
-        pool = TIER_3
 
-    elif tier == 4:
-        pool = TIER_4
+ELITES = {
+    1: [
+        {"name": "Cyclop", "hp": 55, "attack": 10},
+        {"name": "Valkyrie", "hp": 70, "attack": 7},
+    ],
+    
+    2: [
+        {"name": "Giant Spider", "hp": 45, "attack": 10},
+    ],
+
+    3: [
+        {"name": "Juggernaut", "hp": 45, "attack": 10},
+    ]
+}
+
+
+BOSSES = {
+    1: [
+        {"name": "Dragon", "hp": 100, "attack": 15},
+    ],
+
+    2: [
+        {"name": "Demon", "hp": 180, "attack": 25},
+    ],
+
+    3: [
+        {"name": "Ferumbras", "hp": 180, "attack": 25},
+    ]
+}
+
+
+
+
+def get_monster(data):
+
+    t = data.get("type")
+    act = data.get("act", 1)
+
+    if t == "mob":
+        pool = MOBS.get(act, MOBS[1])
+
+    elif t == "elite":
+        pool = ELITES.get(act, ELITES[1])
+
+    elif t == "boss":
+        act = data.get("act", 1)
+        pool = BOSSES.get(act, BOSSES[1])
 
     else:
-        pool = BOSSES
+        print("UNKNOWN TYPE:", data)
+        pool = MOBS[1]
 
     return random.choice(pool)

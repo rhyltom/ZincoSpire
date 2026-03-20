@@ -6,8 +6,9 @@ from entities.map_node import MapNode
 
 class MapState:
 
-    def __init__(self):
+    def __init__(self, act):
 
+        self.act = act
         self.nodes = []
         self.node_lookup = {}
         self.rows = []
@@ -112,12 +113,12 @@ class MapState:
                     self.current_node = node
                     node.visited = True
 
-                    if node.type in "mob":
-                        return ("COMBAT", 1)
-                    elif node.type in "elite":
-                        return ("COMBAT", 2)
-                    elif node.type in "boss":
-                        return ("COMBAT", 4)
+                    if node.type == "mob":
+                        return ("COMBAT", {"type": "mob", "tier": 1})
+                    elif node.type == "elite":
+                        return ("COMBAT", {"type": "elite", "tier": 2})
+                    elif node.type == "boss":
+                        return ("COMBAT", {"type": "boss", "act": self.act})
                     elif node.type in "rest":
                         return "REST"
                     elif node.type == "shop":
