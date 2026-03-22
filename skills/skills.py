@@ -63,6 +63,11 @@ def power_strike(combat):
         DamageText(400,110,str(damage),(255,80,80))
     )
 
+    combat.enemy_bleed += 2
+    combat.damage_texts.append(
+        DamageText(400,140,"Bleeding!",(255,120,0))
+    )
+
     combat.hit_flash = 6
     combat.shake = 6
 
@@ -100,27 +105,29 @@ def berserk(combat):
 # ========================
 # MAGE SKILLS
 def fireball(combat):
-
     cost = 2
 
     if combat.player.mana < cost:
         return
 
     combat.player.mana -= cost
-
     damage = combat.player.mgc * 3
     damage = apply_magic_bonus(combat, damage)
-
     combat.enemy_hp -= damage
-
     combat.damage_texts.append(
         DamageText(400,110,str(damage),(80,120,255))
     )
 
+    combat.enemy_burn += 2
+    combat.damage_texts.append(
+        DamageText(400,140,"Burn!",(255,120,0))
+    )
+
     combat.hit_flash = 6
     combat.shake = 6
-
     combat.player_turn = False
+
+
 
 
 def ice_blast(combat):
@@ -173,39 +180,39 @@ def lightning(combat):
 
 # ========================
 # HUNTER SKILLS
-def power_shot(combat):
 
-    damage = int((combat.player.attack + combat.player.str + combat.temp_str) * 1.5)
+def flaming_arrow(combat):
 
+    damage = int((combat.player.attack + combat.player.str + combat.temp_str) * 1.2)
     combat.enemy_hp -= damage
 
     combat.damage_texts.append(
-        DamageText(400,110,str(damage),(255,200,80))
+        DamageText(400,110,str(damage),(255,150,50))
     )
+    combat.enemy_burn += 2
 
+    combat.damage_texts.append(
+        DamageText(400,140,"Burn!",(255,120,0))
+    )
     combat.hit_flash = 6
     combat.shake = 6
-
     combat.player_turn = False
+
 
 
 def poison_arrow(combat):
 
     damage = int((combat.player.attack + combat.player.str + combat.temp_str) * 1.2)
-
     combat.enemy_hp -= damage
 
     combat.damage_texts.append(
         DamageText(400,110,str(damage),(100,255,100))
     )
-
-    # poison DOT
     combat.enemy_poison += 3
-
     combat.hit_flash = 6
     combat.shake = 6
-
     combat.player_turn = False
+
 
 
 def rapid_fire(combat):

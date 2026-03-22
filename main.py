@@ -30,11 +30,27 @@ font = pygame.font.SysFont(None, 28)
 side_panel = pygame.Rect(700, 20, 280, 560)
 
 
+# ========================
+# icons = 24x24
+atk_icon = pygame.image.load("assets/icons/atk.png").convert_alpha()
+str_icon = pygame.image.load("assets/icons/str.png").convert_alpha()
+mgc_icon = pygame.image.load("assets/icons/mgc.png").convert_alpha()
+hp_icon = pygame.image.load("assets/icons/hp.png").convert_alpha()
+mana_icon = pygame.image.load("assets/icons/mana.png").convert_alpha()
+gold_icon = pygame.image.load("assets/icons/gold.png").convert_alpha()
+
+
+atk_icon = pygame.transform.scale(atk_icon, (24,24))
+str_icon = pygame.transform.scale(str_icon, (24,24))
+mgc_icon = pygame.transform.scale(mgc_icon, (24,24))
+hp_icon = pygame.transform.scale(hp_icon, (24,24))
+mana_icon = pygame.transform.scale(mana_icon, (24,24))
+gold_icon = pygame.transform.scale(gold_icon, (24,24))
+
+
 
 # ========================
 # INITIAL STATES
-# ========================
-
 player = None
 
 current_act = 1
@@ -49,8 +65,6 @@ running = True
 
 # ========================
 # MAIN LOOP
-# ========================
-
 while running:
 
     for event in pygame.event.get():
@@ -63,8 +77,6 @@ while running:
 
         # ========================
         # STATES THAT RETURN TUPLES
-        # ========================
-
         if isinstance(new_state, tuple):
 
             state_name = new_state[0]
@@ -72,8 +84,6 @@ while running:
 
             # ========================
             # START GAME (CHOOSE CLASS)
-            # ========================
-
             if state_name == "START_GAME":
 
                 vocation = new_state[1]
@@ -89,8 +99,6 @@ while running:
 
             # ========================
             # COMBAT
-            # ========================
-
             elif state_name == "COMBAT":
 
                 data = new_state[1]
@@ -100,8 +108,6 @@ while running:
 
             # ========================
             # VICTORY → REWARD
-            # ========================
-
             elif state_name == "VICTORY":
 
                 data = new_state[1]
@@ -109,6 +115,7 @@ while running:
                     # se for boss → próximo act
                 if data.get("type") == "boss":
                     player.gold += 50
+                    player.hp = player.max_hp
 
                     # boss final → acaba logo
                     if current_act >= MAX_ACT:
@@ -127,8 +134,6 @@ while running:
 
         # ========================
         # SIMPLE STATES
-        # ========================
-
         elif new_state == "MAP":
             if next_map:
                 map_state = next_map
@@ -138,8 +143,6 @@ while running:
 
         # ========================
         # REST (CAMPFIRE)
-        # ========================
-
         elif new_state == "REST":
 
             heal = int(player.max_hp * 0.3)
@@ -151,8 +154,6 @@ while running:
 
         # ========================
         # SHOP
-        # ========================
-
         elif new_state == "SHOP":
 
             state = ShopState(player)
@@ -160,8 +161,6 @@ while running:
 
         # ========================
         # RESTART GAME
-        # ========================
-
         elif new_state == "RESTART":
 
             player = None
@@ -185,8 +184,6 @@ while running:
 
     # ========================
     # DRAW
-    # ========================
-
     screen.fill((44,44,44))
 
 
@@ -200,29 +197,32 @@ while running:
 
     # ========================
     # PLAYER UI
-    # ========================
-
     if player:
 
+        
         screen.blit(font.render("PLAYER", True, (255,255,255)), (720,40))
 
-        screen.blit(font.render(f"HP: {player.hp}/{player.max_hp}", True, (255,255,255)), (720,80))
+        screen.blit(hp_icon, (720,80))
+        screen.blit(font.render(f"{player.hp}/{player.max_hp}", True, (255,255,255)), (750,80))
 
-        screen.blit(font.render(f"Mana: {player.mana}", True, (255,255,255)), (720,120))
+        screen.blit(mana_icon, (720,120))
+        screen.blit(font.render(str(player.mana), True, (255,255,255)), (750,120))
 
-        screen.blit(font.render(f"Gold: {player.gold}", True, (255,215,0)), (720,160))
+        screen.blit(gold_icon, (720,160))
+        screen.blit(font.render(str(player.gold), True, (255,215,0)), (750,160))
 
-        screen.blit(font.render(f"ATK: {player.attack}", True, (255,255,255)), (720,200))
+        screen.blit(atk_icon, (720,200))
+        screen.blit(font.render(str(player.attack), True, (255,255,255)), (750,200))
+        
+        screen.blit(str_icon, (720,240))
+        screen.blit(font.render(str(player.str), True, (255,255,255)), (750,240))
 
-        screen.blit(font.render(f"STR: {player.str}", True, (255,255,255)), (720,240))
-
-        screen.blit(font.render(f"MGC: {player.mgc}", True, (255,255,255)), (720,280))
+        screen.blit(mgc_icon, (720,280))
+        screen.blit(font.render(str(player.mgc), True, (255,255,255)), (750,280))
 
 
         # ========================
         # ITEMS
-        # ========================
-
         y = 340
 
         for item in player.items:

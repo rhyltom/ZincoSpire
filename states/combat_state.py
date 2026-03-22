@@ -8,7 +8,7 @@ from entities.monsters import get_monster
 from skills.skills import (
     fireball,
     power_strike,
-    power_shot,
+    flaming_arrow,
     shield_block,
     mana_shield,
     evade,
@@ -60,6 +60,8 @@ class CombatState:
         self.enemy_max_hp = monster["hp"]
         self.enemy_attack = monster["attack"]
         self.enemy_poison = 0
+        self.enemy_burn = 0
+        self.enemy_bleed = 0
         self.enemy_timer = 0
 
         self.temp_evade_bonus = 0
@@ -72,6 +74,17 @@ class CombatState:
         self.shake = 0
         self.skill_cooldowns = {}
         self.defense_cooldown = 0
+
+
+        # ========================
+        # ICONS
+        self.poison_icon = pygame.image.load("assets/icons/poison.png").convert_alpha()
+        self.poison_icon = pygame.transform.scale(self.poison_icon, (24,24))
+        self.burn_icon = pygame.image.load("assets/icons/burn.png").convert_alpha()
+        self.burn_icon = pygame.transform.scale(self.burn_icon, (24,24))
+        self.bleed_icon = pygame.image.load("assets/icons/bleed.png").convert_alpha()
+        self.bleed_icon = pygame.transform.scale(self.bleed_icon, (24,24))
+
 
         # ========================
         # SPRITE
@@ -157,8 +170,8 @@ class CombatState:
             power_strike(self)
             self.skill_cooldowns[skill_id] = 3
 
-        elif skill_id == "power_shot":
-            power_shot(self)
+        elif skill_id == "flaming_arrow":
+            flaming_arrow(self)
             self.skill_cooldowns[skill_id] = 3
 
         elif skill_id == "evade":
@@ -208,6 +221,9 @@ class CombatState:
                     is_crit = random.random() < self.player.crit_chance
 
                     damage = base_damage * (self.player.crit_multiplier if is_crit else 1)
+
+                    if self.enemy_bleed > 0:
+                        damage = int(damage * 1.33)
 
                     self.enemy_hp -= damage
 
@@ -273,10 +289,16 @@ class CombatState:
                 if self.enemy_poison > 0:
                     poison_damage = self.enemy_poison
                     self.enemy_hp -= poison_damage
+                    self.enemy_poison -= 1
                     self.damage_texts.append(
                         DamageText(COMBAT_CENTER_X, 80, f"Poison {poison_damage}", (100,255,100))
                 )
-                    self.enemy_poison -= 1
+                    
+                if self.enemy_hp <= 0:
+                    self.combat_over = True
+                    return
+             
+
 
 
 
@@ -313,6 +335,11 @@ class CombatState:
 
                 attack = self.enemy_attack
 
+                # ============
+                #if Burn -> Weak
+                if self.enemy_burn > 0:
+                    attack = int(attack * 0.67)
+
                 # ========================
                 # PASSIVE: HUNTER EVADE
                 if self.player.passive["name"] == "Hunter Instinct":
@@ -348,6 +375,33 @@ class CombatState:
 
                 self.player.block = 0
 
+
+
+                # ========================
+                # BURN DAMAGE
+                if self.enemy_burn > 0:
+
+                    burn_damage = self.enemy_burn
+                    self.enemy_hp -= burn_damage
+                    self.enemy_burn -= 1
+                    self.damage_texts.append(
+                        DamageText(COMBAT_CENTER_X, 140, f"Burn {burn_damage}", (255,120,0))
+                    )
+
+                # ========================
+                # BLEED DAMAGE
+                if self.enemy_bleed > 0:
+
+                    bleed_damage = self.enemy_bleed
+                    self.enemy_hp -= bleed_damage
+                    self.enemy_bleed -= 1
+                    self.damage_texts.append(
+                        DamageText(COMBAT_CENTER_X, 170, f"Bleed {bleed_damage}", (255,50,50))
+                    )
+
+
+
+
                 self.player_turn = True
                 self.enemy_timer = 0
                 # PASSIVE: MAGE MANA REGEN
@@ -366,6 +420,9 @@ class CombatState:
             self.shake -= 1
 
 
+
+
+
     def draw(self, screen, font):
 
         offset_x = random.randint(-5,5) if self.shake > 0 else 0
@@ -380,12 +437,37 @@ class CombatState:
         hp_y = enemy_rect.top - 20
         draw_hp_bar(screen, COMBAT_CENTER_X-150, hp_y, 300, 25, self.enemy_hp, self.enemy_max_hp)
         # ========================
-        # POISON UI
-        if self.enemy_poison > 0:
-            poison_text = font.render(f"Poison: {self.enemy_poison}", True, (100,255,100))
-            screen.blit(poison_text, (COMBAT_CENTER_X - 60, hp_y - 25))
+        # EFFECTS UI
+        status_x = COMBAT_CENTER_X - 150
+        status_y = hp_y + 30
+        x = status_x
+        gap = 60
 
-        screen.blit(font.render(f"Intent: Attack {self.enemy_attack}",True,(255,200,200)),(COMBAT_CENTER_X-120,210))
+        # Poison
+        if self.enemy_poison > 0:
+            screen.blit(self.poison_icon, (x, status_y))
+            screen.blit(font.render(str(self.enemy_poison), True, (255,255,255)), (x+28, status_y))
+            x += gap
+
+        # Burn
+        if getattr(self, "enemy_burn", 0) > 0:
+            screen.blit(self.burn_icon, (x, status_y))
+            screen.blit(font.render(str(self.enemy_burn), True, (255,255,255)), (x+28, status_y))
+            x += gap
+
+        # Bleed
+        if getattr(self, "enemy_bleed", 0) > 0:
+            screen.blit(self.bleed_icon, (x, status_y))
+            screen.blit(font.render(str(self.enemy_bleed), True, (255,255,255)), (x+28, status_y))
+            x += gap
+
+
+        display_attack = self.enemy_attack
+        if self.enemy_burn > 0:
+            display_attack = int(self.enemy_attack * 0.67)
+
+        screen.blit(font.render(f"Intent: Attack {display_attack}",True,(255,200,200)),(COMBAT_CENTER_X-120,230))
+
 
         draw_hp_bar(screen, COMBAT_CENTER_X-150, PLAYER_HP_Y, 300, 25, self.player.hp, self.player.max_hp)
         screen.blit(font.render("Player",True,(255,255,255)),(COMBAT_CENTER_X-100,PLAYER_LABEL_Y))
