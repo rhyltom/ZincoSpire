@@ -94,6 +94,7 @@ def berserk(combat):
 
     buff = 2
     combat.temp_str += buff
+    combat.temp_str_turns = 3
 
     combat.damage_texts.append(
         DamageText(400,330,f"+{buff} STR",(255,50,50))
