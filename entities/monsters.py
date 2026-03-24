@@ -38,15 +38,21 @@ ELITES = {
 
 BOSSES = {
     1: [
-        {"name": "Dragon", "hp": 100, "attack": 15},
+        {"name": "Dragon Lord", "hp": 110, "attack": 15},
+        {"name": "Hydra", "hp": 120, "attack": 14},
+        {"name": "Behemoth", "hp": 150, "attack": 13},
     ],
 
     2: [
         {"name": "Demon", "hp": 180, "attack": 25},
+        {"name": "Medusa", "hp": 180, "attack": 25},
+
     ],
 
     3: [
-        {"name": "Ferumbras", "hp": 180, "attack": 25},
+        {"name": "Ferunobras", "hp": 180, "attack": 25},
+        {"name": "Orcabaal", "hp": 180, "attack": 25},
+
     ]
 }
 

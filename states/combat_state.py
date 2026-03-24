@@ -21,6 +21,12 @@ from skills.skills import (
     rapid_fire,
 )
 
+from entities.enemies.intents.bosses import (
+    dragon_lord_intent,
+    hydra_intent,
+    behemoth_intent,
+)
+
 # ========================
 # CONSTANTES DE UI
 # ========================
@@ -60,7 +66,7 @@ def draw_hp_bar(screen, x, y, width, height, current_hp, max_hp, font):
 class CombatState:
 
     # ========================
-    # APLICA MODIFICADORES AO DANO
+        # APLICA MODIFICADORES AO DANO
     # ========================
     def deal_damage(self, damage):
 
@@ -69,6 +75,23 @@ class CombatState:
             damage = int(damage * 1.33)
 
         return damage
+    
+    # ========================
+        # NOVO: INTENT SYSTEM
+    # ========================
+    def generate_intent(self):
+
+        if self.enemy_name == "Dragon Lord":
+            self.intent = dragon_lord_intent(self)
+
+        elif self.enemy_name == "Hydra":
+            self.intent = hydra_intent(self)
+
+        elif self.enemy_name == "Behemoth":
+            self.intent = behemoth_intent(self)
+
+        else:
+            self.intent = {"type": "attack", "value": self.enemy_attack}
 
 
     # ========================
@@ -82,17 +105,25 @@ class CombatState:
         # Buscar dados do monstro
         monster = get_monster(data)
 
+
         self.enemy_name = monster["name"]
         self.enemy_hp = monster["hp"]
         self.enemy_max_hp = monster["hp"]
         self.enemy_attack = monster["attack"]
+
 
         # Status effects do inimigo
         self.enemy_poison = 0
         self.enemy_burn = 0
         self.enemy_bleed = 0
 
+
         self.enemy_timer = 0  # controla quando inimigo ataca
+
+
+        # novos intents
+        self.intent = None
+        self.generate_intent()
 
         # Buffs temporários do player
         self.temp_evade_bonus = 0
@@ -359,7 +390,7 @@ class CombatState:
         if not self.player_turn and not self.combat_over and self.enemy_hp > 0:
             self.enemy_timer += 1
 
-            if self.enemy_timer > 30:
+            if self.enemy_timer > 30: 
 
                 # ========================
                 # POISON
@@ -402,9 +433,18 @@ class CombatState:
                     self.temp_evade_bonus = 0
                     self.player_turn = True
                     self.enemy_timer = 0
+
+                    self.generate_intent() # <------ AQUIs
+                    
                     return
 
-                attack = self.enemy_attack
+
+                intent = self.intent
+
+                if intent["type"] == "attack":
+                    attack = intent["value"]
+                else:
+                    attack = self.enemy_attack  # fallback para não crashar
 
                 # Burn reduz ataque
                 if self.enemy_burn > 0:
@@ -456,6 +496,7 @@ class CombatState:
 
                 self.player_turn = True
                 self.enemy_timer = 0
+                self.generate_intent()
 
                 # mana regen passivo
                 if self.player.passive["name"] == "Arcane Power":
@@ -494,6 +535,13 @@ class CombatState:
         # HP inimigo
         hp_y = enemy_rect.top - 20
         draw_hp_bar(screen, COMBAT_CENTER_X-150, hp_y, 300, 25, self.enemy_hp, self.enemy_max_hp, font)
+
+
+        # nome enemy
+        name_text = font.render(self.enemy_name, True, (255,255,255))
+        name_x = COMBAT_CENTER_X + 150 - name_text.get_width()
+        name_y = hp_y + 30
+        screen.blit(name_text, (name_x, name_y))
 
         # ========================
         # STATUS ICONS
